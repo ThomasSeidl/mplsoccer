@@ -27,6 +27,8 @@ class BasePitch(ABC):
         'wyscout', 'uefa', 'metricasports', 'custom', 'skillcorner' and 'secondspectrum'.
     half : bool, default False
         Whether to display half of the pitch.
+    defense: bool. default False
+        Whether to plot only defense half of pitch.
     pitch_color : any Matplotlib color, default None
         The background color for each Matplotlib axis.
          If None, defaults to rcParams["axes.facecolor"].
@@ -109,7 +111,8 @@ class BasePitch(ABC):
         from mplsoccer import VerticalPitch.
     """
 
-    def __init__(self, pitch_type='statsbomb', half=False,
+    def __init__(self, pitch_type='statsbomb', 
+                 half=False, defense=False,
                  pitch_color=None, line_color=None, linewidth=2, line_zorder=0.9, spot_scale=0.002,
                  stripe=False, stripe_color='#c2d59d', stripe_zorder=0.6,
                  pad_left=None, pad_right=None, pad_bottom=None, pad_top=None,
@@ -124,6 +127,7 @@ class BasePitch(ABC):
         # initialize attributes
         self.pitch_type = pitch_type
         self.half = half
+        self.defense = defense
         self.pitch_color = pitch_color
         if self.pitch_color is None:
             self.pitch_color = rcParams['axes.facecolor']
@@ -248,7 +252,7 @@ class BasePitch(ABC):
 
     def __repr__(self):
         return (f'{self.__class__.__name__}('
-                f'pitch_type={self.pitch_type!r}, half={self.half!r}, '
+                f'pitch_type={self.pitch_type!r}, half={self.half!r}, defense={self.defense!r}, '
                 f'pitch_color={self.pitch_color!r}, line_color={self.line_color!r}, '
                 f'linewidth={self.linewidth!r}, line_zorder={self.line_zorder!r}, '
                 f'stripe={self.stripe!r}, stripe_color={self.stripe_color!r}, '

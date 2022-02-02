@@ -172,7 +172,7 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         One of FixedDims, MetricasportsDims, VariableCenterDims, or CustomDims.
         Automatically populated when using Pitch/ VerticalPitch class
     positional : str
-        One of 'full', 'horizontal' or 'vertical' for the respective heatmaps.
+        One of 'full', 'horizontal', 'vertical', 'thirds' or 'penalty_box_offense', 'penalty_box_defense'  for the respective heatmaps.
     statistic : string or callable, optional
         The statistic to compute (default is 'count').
         The following statistics are available: 'count' (default),
@@ -277,6 +277,13 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
 
         stats = [result1, result2, result3, result4, result5]
 
+    elif positional == 'full_grid':
+        xedge = dim.positional_x
+        yedge = dim.positional_y
+        stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedge, yedge))
+        stats = [stats]
+
     elif positional == 'horizontal':
         xedge = dim.positional_x[[0, 6]]
         yedge = dim.positional_y
@@ -290,8 +297,48 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
                               bins=(xedge, yedge))
         stats = [stats]
+
+    elif positional == 'thirds':
+        # divide pitch into horizontal thirds
+
+        min_x = dim.positional_x.min()
+        max_x = dim.positional_x.max()
+        length_third_x = (max_x - min_x)/3
+
+        xedge = np.arange(min_x, max_x + length_third_x, length_third_x)
+        yedge = dim.positional_y[[0, 5]]
+        stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedge, yedge))
+        stats = [stats]
+
+    elif positional == 'penalty_box_offense':
+        # divide penalty box into four zones
+        xedge = dim.positional_x[[5, 6]]
+
+        # insert a new zone in y between six yard box and penalty spot 
+        yedge = np.concatenate((dim.positional_y[[1, 2, 3, 4]], 
+                               np.array([dim.positional_y[[2, 3]].mean()])))
+        yedge.sort(kind='mergesort')
+
+        stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedge, yedge))
+        stats = [stats]
+
+    elif positional == 'penalty_box_defense':
+        # divide penalty box into four zones
+        xedge = dim.positional_x[[0, 1]]
+
+        # insert a new zone in y between six yard box and penalty spot 
+        yedge = np.concatenate((dim.positional_y[[1, 2, 3, 4]], 
+                               np.array([dim.positional_y[[2, 3]].mean()])))
+        yedge.sort(kind='mergesort')
+
+        stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedge, yedge))
+        stats = [stats]
+
     else:
-        raise ValueError("positional must be one of 'full', 'vertical' or 'horizontal'")
+        raise ValueError("positional must be one of 'full', 'vertical', 'horizontal', 'thirds' or 'penalty_box_offense', 'penalty_box_defense'")
         
     if normalize:
         total = np.array([stat['statistic'].sum() for stat in stats]).sum()

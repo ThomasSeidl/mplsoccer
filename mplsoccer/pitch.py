@@ -25,8 +25,12 @@ class Pitch(BasePitchPlot):
                                        dtype=np.float32), a_min=None, a_max=0.)
         visible_pad[[0, 2]] = - visible_pad[[0, 2]]
         if self.half:
-            extent[0] = self.dim.center_length  # pitch starts at center line
-            visible_pad[0] = - self.pad_left  # do not want clipped values if half
+            if self.defense:
+                extent[1] = self.dim.center_length  # pitch ends at center line
+                visible_pad[1] = self.pad_right  # do not want clipped values if half
+            else:
+                extent[0] = self.dim.center_length  # pitch starts at center line
+                visible_pad[0] = - self.pad_left  # do not want clipped values if half
         if self.dim.invert_y:  # when inverted the padding is negative
             pad[2:] = -pad[2:]
             visible_pad[2:] = - visible_pad[2:]
@@ -131,8 +135,14 @@ class VerticalPitch(BasePitchPlot):
                               a_min=None, a_max=0.)
         visible_pad[[1, 2]] = - visible_pad[[1, 2]]
         if self.half:
-            extent[2] = self.dim.center_length  # pitch starts at center line
-            visible_pad[2] = - self.pad_bottom  # do not want clipped values if half
+            if self.defense:
+                # show left part of the pitch
+                extent[3] = self.dim.center_length  # pitch starts ends center line
+                visible_pad[3] =  self.pad_top  # do not want clipped values if half
+            else:
+                # show right part
+                extent[2] = self.dim.center_length  # pitch starts at center line
+                visible_pad[2] = - self.pad_bottom  # do not want clipped values if half
         if self.dim.invert_y:  # when inverted the padding is negative
             pad[0:2] = -pad[0:2]
             visible_pad[0:2] = - visible_pad[0:2]
