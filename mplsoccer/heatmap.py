@@ -338,10 +338,13 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         stats = [stats]
 
     elif positional == 'zones_corners_offense':
-
+        
         # zones outside penalty box - wings
-        xedges_wings = dim.positional_x[[3,6]]
-        yedges_wings = dim.positional_y[[0,1, 4,5]]
+        xedges_wings_left = dim.positional_x[[3,6]]
+        yedges_wings_left = dim.positional_y[[4,5]]
+
+        xedges_wings_right = dim.positional_x[[3,6]]
+        yedges_wings_right = dim.positional_y[[0,1]]
 
         # zones outside penalty box - middle
         xedges_middle = dim.positional_x[[3,5]]
@@ -368,16 +371,20 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
         stats_box = bin_statistic(x, y, values, dim=dim, statistic=statistic,
                               bins=(xedges_box, yedges_box))
 
-        stats_wings = bin_statistic(x, y, values, dim=dim, statistic=statistic,
-                              bins=(xedges_wings, yedges_wings))
+        stats_wings_left = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedges_wings_left, yedges_wings_left))
+
+        stats_wings_right = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedges_wings_right, yedges_wings_right))
+
 
         stats_middle = bin_statistic(x, y, values, dim=dim, statistic=statistic,
                               bins=(xedges_middle, yedges_middle))                
 
-        stats = [stats_box] + [stats_wings] + [stats_middle]
-
+        stats = [stats_box] + [stats_wings_right] + [stats_wings_left] + [stats_middle]
+        
     else:
-        raise ValueError("positional must be one of 'full', 'vertical', 'horizontal', 'thirds' or 'penalty_box_offense', 'penalty_box_defense'")
+        raise ValueError(f"positional must be one of 'full', 'vertical', 'horizontal', 'thirds' or 'penalty_box_offense', 'penalty_box_defense', 'zones_corners_offense. Got: {positional}.")
         
     if normalize:
         total = np.array([stat['statistic'].sum() for stat in stats]).sum()
