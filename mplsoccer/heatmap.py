@@ -337,6 +337,45 @@ def bin_statistic_positional(x, y, values=None, dim=None, positional='full', sta
                               bins=(xedge, yedge))
         stats = [stats]
 
+    elif positional == 'zones_corners_offense':
+
+        # zones outside penalty box - wings
+        xedges_wings = dim.positional_x[[3,6]]
+        yedges_wings = dim.positional_y[[0,1, 4,5]]
+
+        # zones outside penalty box - middle
+        xedges_middle = dim.positional_x[[3,5]]
+        yedges_middle = dim.positional_y[[1,4]]
+
+        # divide penalty box into eight zones
+        # xedge = dim.positional_x[[5, 6]]
+        xedges_box = np.concatenate((dim.positional_x[[5, 6]], # penalty box
+                                np.array([dim.positional_x[[5, 6]].mean()]) # further divide at middle
+                                )
+                              )   
+
+        xedges_box.sort(kind='mergesort')
+        
+        # insert a new zone in y between six yard box and penalty spot 
+        yedges_box = np.concatenate((dim.positional_y[[1, 2, 3, 4]], 
+                               np.array([dim.positional_y[[2, 3]].mean()])))
+
+        yedges_box.sort(kind='mergesort')
+
+        # stats = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+        #                       bins=(xedge, yedge))
+
+        stats_box = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedges_box, yedges_box))
+
+        stats_wings = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedges_wings, yedges_wings))
+
+        stats_middle = bin_statistic(x, y, values, dim=dim, statistic=statistic,
+                              bins=(xedges_middle, yedges_middle))                
+
+        stats = [stats_box] + [stats_wings] + [stats_middle]
+
     else:
         raise ValueError("positional must be one of 'full', 'vertical', 'horizontal', 'thirds' or 'penalty_box_offense', 'penalty_box_defense'")
         
